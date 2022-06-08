@@ -1,0 +1,52 @@
+name: Push the results of OpenAPI generator to a repository
+inputs:
+  destination:
+    description:
+      Respository to push to in the "user/repo" format.
+    required: true
+  generator:
+    description:
+      Name of the generator in the same format as of
+      the "--generator-name" parameter of the "openapi-generator" CLI util.
+    required: true
+  schema:
+    description:
+      The OpenAPI schema file.
+    required: true
+  username:
+    description:
+      Name to be used as the author of commit.
+    required: true
+  email:
+    description:
+      Email to be used as of the author of commit.
+    required: true
+  deploy-key:
+    description: |
+      Private part of the deploy-key. 
+
+      Use `ssh-keygen` to produce it and add the public part as a deploy-key
+      to the destination repository.
+      
+      Use secrets to store the value of this key in this repository.
+runs:
+  using: composite
+  steps:
+    - name: Check out the source code
+      uses: actions/checkout@v3.0.2
+
+    - name: Generate code
+      uses: craicoverflow/openapi-generator-generate-action@v1.2.1
+      with:
+        generator: ${{ inputs.generator }}
+        input: ${{ inputs.schema }}
+        output: dist
+
+    - name: Push directory to another repository
+      uses: leigholiver/commit-with-deploy-key@v1.0.3
+      with:
+        source: dist
+        destination_repo: ${{ inputs.destination }}
+        git_username: ${{ inputs.username }}
+        git_email: ${{ inputs.email }}
+        deploy_key: ${{ inputs.deploy-key }}
