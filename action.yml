@@ -50,3 +50,4 @@ runs:
         git_username: ${{ inputs.username }}
         git_email: ${{ inputs.email }}
         deploy_key: ${{ inputs.deploy-key }}
+        delete_destination: true
